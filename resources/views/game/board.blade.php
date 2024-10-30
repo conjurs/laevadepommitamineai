@@ -64,28 +64,28 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-16 max-w-6xl mx-auto">
+        <div class="grid grid-cols-2 gap-8 max-w-6xl mx-auto">
             <div class="space-y-4">
                 <div class="flex items-center gap-2 mb-2">
                     <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
                     <h2 class="text-xl font-semibold">Your Fleet</h2>
                 </div>
                 <div class="relative">
-                    <div class="absolute -left-10 top-0 bottom-0 flex flex-col justify-around text-zinc-500 text-sm">
+                    <div class="absolute -left-8 top-0 bottom-0 flex flex-col justify-between text-zinc-500 text-sm h-full">
                         @foreach(range('A', 'J') as $letter)
-                            <div>{{ $letter }}</div>
+                            <div class="h-12 flex items-center justify-end pr-2">{{ $letter }}</div>
                         @endforeach
                     </div>
-                    <div class="absolute -top-6 left-0 right-0 flex justify-around text-zinc-500 text-sm">
-                        @foreach(range(1, 10) as $number)
-                            <div>{{ $number }}</div>
+                    <div class="absolute -top-8 left-0 right-0 flex text-zinc-500 text-sm w-full">
+                        @foreach(range('A', 'J') as $index => $letter)
+                            <div class="w-12 flex items-center justify-center">{{ $index + 1 }}</div>
                         @endforeach
                     </div>
-                    <div id="player-board" class="grid grid-cols-10 bg-zinc-900 p-2 rounded-lg border border-zinc-800">
+                    <div id="player-board">
                         @for ($i = 0; $i < 10; $i++)
                             @for ($j = 0; $j < 10; $j++)
                                 <div data-x="{{ $i }}" data-y="{{ $j }}" 
-                                     class="w-10 h-10 rounded bg-zinc-800 hover:bg-zinc-700 transition-colors border border-zinc-900">
+                                     class="w-12 h-12 rounded bg-zinc-800 hover:bg-zinc-700 transition-colors border border-zinc-900">
                                 </div>
                             @endfor
                         @endfor
@@ -99,21 +99,21 @@
                     <h2 class="text-xl font-semibold">Enemy Fleet</h2>
                 </div>
                 <div class="relative">
-                    <div class="absolute -left-10 top-0 bottom-0 flex flex-col justify-around text-zinc-500 text-sm">
+                    <div class="absolute -left-8 top-0 bottom-0 flex flex-col justify-between text-zinc-500 text-sm h-full">
                         @foreach(range('A', 'J') as $letter)
-                            <div>{{ $letter }}</div>
+                            <div class="h-12 flex items-center justify-end pr-2">{{ $letter }}</div>
                         @endforeach
                     </div>
-                    <div class="absolute -top-6 left-0 right-0 flex justify-around text-zinc-500 text-sm">
-                        @foreach(range(1, 10) as $number)
-                            <div>{{ $number }}</div>
+                    <div class="absolute -top-8 left-0 right-0 flex text-zinc-500 text-sm w-full">
+                        @foreach(range('A', 'J') as $index => $letter)
+                            <div class="w-12 flex items-center justify-center">{{ $index + 1 }}</div>
                         @endforeach
                     </div>
-                    <div id="ai-board" class="grid grid-cols-10 bg-zinc-900 p-2 rounded-lg border border-zinc-800">
+                    <div id="ai-board">
                         @for ($i = 0; $i < 10; $i++)
                             @for ($j = 0; $j < 10; $j++)
                                 <button data-x="{{ $i }}" data-y="{{ $j }}" disabled 
-                                        class="w-10 h-10 rounded bg-zinc-800 hover:bg-zinc-700 transition-colors border border-zinc-900">
+                                        class="w-12 h-12 rounded bg-zinc-800 hover:bg-zinc-700 transition-colors border border-zinc-900">
                                 </button>
                             @endfor
                         @endfor
@@ -276,19 +276,21 @@
                 try {
                     const response = await axios.post('/game/shoot', { x, y });
                     
-                    
                     e.target.disabled = true;
-                    e.target.classList.remove('bg-zinc-800', 'bg-zinc-700');
-                    e.target.classList.add(response.data.hit ? 'bg-red-500' : 'bg-gray-500');
+                    e.target.classList.remove('bg-zinc-800', 'bg-zinc-700', 'hover:bg-zinc-700');
+                    
+                    // Add a small delay to ensure proper transition
+                    setTimeout(() => {
+                        e.target.classList.add(response.data.hit ? 'bg-red-500' : 'bg-gray-500');
+                    }, 50);
+                    
                     addLogMessage(response.data.hit ? 'You hit a ship!' : 'Miss!', 'success');
 
-                    
                     if (response.data.hit) {
                         const scoreElement = document.getElementById('score');
                         scoreElement.textContent = parseInt(scoreElement.textContent) + 1;
                     }
 
-                    
                     if (response.data.ai_shot) {
                         const aiX = response.data.ai_shot.x;
                         const aiY = response.data.ai_shot.y;
@@ -310,13 +312,11 @@
                         }
                     }
 
-                    
                     if (response.data.gameOver) {
                         gamePhase = 'ended';
                         const score = document.getElementById('score').textContent;
                         showGameOver(response.data.winner, score);
                         document.querySelectorAll('#ai-board button').forEach(btn => btn.disabled = true);
-                        
                         
                         const gameOverMessage = response.data.winner === 'Player' ? 
                             'Congratulations! You Win!' : 
