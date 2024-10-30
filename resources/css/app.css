@@ -56,31 +56,21 @@
     animation: rainbow 5s linear infinite;
 }
 
-.difficulty-select {
-    background: #1a1a1a;
-    border: 2px solid #2a2a2a;
-    color: #fff;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.5rem center;
-    background-size: 1.5em;
-    padding-right: 2.5rem;
-    transition: all 0.2s ease;
-}
+
 
 .difficulty-select:hover {
-    border-color: #3a3a3a;
-    background-color: #222;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
+}
+
+.difficulty-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
 .difficulty-select option {
-    background: #1a1a1a;
-    color: #fff;
+    background-color: #18181b;
     padding: 0.5rem;
 }
 
@@ -155,11 +145,6 @@ footer a:hover img {
 
 /* Remove the previous thunder/lightning effects */
 
-/* Game boards styling */
-#player-board div, #ai-board button {
-    background-color: #27272a;
-    transition: all 0.2s ease;
-}
 
 #player-board div:hover, #ai-board button:hover:not(:disabled) {
     background-color: #3f3f46;
@@ -215,21 +200,21 @@ footer a:hover img {
 
 /* Add these grid styling rules */
 #player-board, #ai-board {
-    gap: 4px;
-    padding: 12px;
+    gap: 1px;
+    padding: 4px;
     background: #18181b;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
-                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-radius: 8px;
+    border: 1px solid #27272a;
 }
 
 #player-board div, #ai-board button {
-    width: 40px;
-    height: 40px;
-    border-radius: 6px;
-    border: 2px solid #27272a;
+    width: 42px;
+    height: 42px;
+    border-radius: 4px;
+    border: 1px solid #27272a;
     transition: all 0.2s ease;
     position: relative;
+    background-color: #27272a;
 }
 
 #player-board div:hover, #ai-board button:hover:not(:disabled) {
@@ -258,6 +243,8 @@ footer a:hover img {
     color: #6b7280;
     font-size: 0.875rem;
     font-weight: 500;
+    width: 20px;
+    text-align: center;
 }
 
 body {
@@ -310,4 +297,290 @@ body {
 footer {
     background-color: var(--dark-black);
     border-color: var(--royal-blue-dark);
+}
+
+/* Lightning effect */
+.lightning-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.lightning {
+    position: absolute;
+    width: 2px;
+    height: 100%;
+    background: #0051FF;
+    opacity: 0;
+    filter: blur(1px);
+    box-shadow: 
+        0 0 20px #0051FF,
+        0 0 40px #0051FF,
+        0 0 60px #0051FF,
+        0 0 80px #0051FF;
+}
+
+.lightning:nth-child(1) {
+    left: 30%;
+    animation: lightningFlash 3s infinite;
+}
+
+.lightning:nth-child(2) {
+    left: 60%;
+    animation: lightningFlash 3s infinite 1s;
+}
+
+.lightning:nth-child(3) {
+    left: 90%;
+    animation: lightningFlash 3s infinite 2s;
+}
+
+@keyframes lightningFlash {
+    0% {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+    1%, 3% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    4%, 100% {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+}
+
+/* Thunder effect */
+.thunder-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    background: linear-gradient(to bottom,
+        rgba(255, 255, 255, 0.1) 0%,
+        transparent 100%
+    );
+}
+
+.lightning {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 0;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.8),
+        0 0 20px rgba(255, 255, 255, 0.8),
+        0 0 30px rgba(255, 255, 255, 0.8),
+        0 0 40px rgba(255, 255, 255, 0.8);
+    animation: lightningFlash 3s infinite;
+}
+
+@keyframes lightningFlash {
+    0% {
+        height: 0;
+        opacity: 0;
+    }
+    10% {
+        height: 100%;
+        opacity: 1;
+    }
+    20% {
+        height: 100%;
+        opacity: 0.8;
+    }
+    30% {
+        height: 100%;
+        opacity: 0.6;
+    }
+    40% {
+        height: 100%;
+        opacity: 0.2;
+    }
+    50% {
+        height: 100%;
+        opacity: 0;
+    }
+    100% {
+        height: 0;
+        opacity: 0;
+    }
+}
+
+
+/* Grid coordinates styling */
+.grid-coordinates {
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.difficulty-select {
+    background: #1a1a1a;
+    border: 2px solid #2a2a2a;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1.5em;
+    padding-right: 2.5rem;
+    transition: all 0.2s ease;
+}
+
+.difficulty-select option {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 0.5rem;
+}
+
+.difficulty-select:hover {
+    border-color: #3a3a3a;
+    background-color: #222;
+}
+
+/* Updated grid styling */
+#player-board div, #ai-board button {
+    background-color: rgba(15, 15, 15, 0.95);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    box-shadow: 
+        inset 0 0 2px rgba(59, 130, 246, 0.1),
+        0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* Grid container styling */
+#player-board, #ai-board {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 
+        0 0 10px rgba(59, 130, 246, 0.1),
+        inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Hover effects */
+#player-board div:hover, #ai-board button:hover:not(:disabled) {
+    background-color: rgba(30, 30, 30, 0.95);
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 
+        inset 0 0 4px rgba(59, 130, 246, 0.2),
+        0 0 4px rgba(59, 130, 246, 0.2);
+}
+
+/* Active cell states */
+.bg-blue-500 {
+    border-color: rgba(59, 130, 246, 0.8) !important;
+    box-shadow: 
+        inset 0 0 8px rgba(59, 130, 246, 0.4),
+        0 0 8px rgba(59, 130, 246, 0.4) !important;
+}
+
+.bg-red-500 {
+    border-color: rgba(239, 68, 68, 0.8) !important;
+    box-shadow: 
+        inset 0 0 8px rgba(239, 68, 68, 0.4),
+        0 0 8px rgba(239, 68, 68, 0.4) !important;
+}
+
+.bg-gray-500 {
+    border-color: rgba(107, 114, 128, 0.8) !important;
+    box-shadow: 
+        inset 0 0 8px rgba(107, 114, 128, 0.4),
+        0 0 8px rgba(107, 114, 128, 0.4) !important;
+}
+
+/* Custom Notification Styling */
+.notyf__toast {
+    border-radius: 8px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+    padding: 8px 16px !important;
+    max-width: 320px !important;
+    font-size: 0.875rem !important;
+}
+
+.notyf__ripple {
+    display: none !important;
+}
+
+.notyf__message {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 500 !important;
+    padding-left: 8px !important;
+}
+
+.notyf__toast--success {
+    background-color: #059669 !important;
+}
+
+.notyf__toast--error {
+    background-color: #DC2626 !important;
+}
+
+#game-log {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(59, 130, 246, 0.5) transparent;
+}
+
+#game-log::-webkit-scrollbar {
+    width: 6px;
+}
+
+#game-log::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#game-log::-webkit-scrollbar-thumb {
+    background-color: rgba(59, 130, 246, 0.5);
+    border-radius: 3px;
+}
+
+.log-entry {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.log-entry.success {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: #10B981;
+}
+
+.log-entry.error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: #EF4444;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

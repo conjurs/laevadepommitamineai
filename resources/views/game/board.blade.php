@@ -6,12 +6,11 @@
     <title>Battleships vs AI</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-zinc-950 text-zinc-50">
+<body class="min-h-screen bg-zinc-950 text-zinc-50 overflow-x-hidden">
+    <div class="matrix-bg"></div>
     <!-- Game Over Modal -->
     <div id="gameOverModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-zinc-900 p-8 rounded-xl shadow-xl text-center max-w-md w-full mx-4">
@@ -33,22 +32,22 @@
                 </h1>
             </div>
             <div class="flex items-center gap-6">
-                <div class="flex items-center gap-3 bg-zinc-900 px-4 py-2 rounded-lg">
-                    <span class="text-zinc-400">Score:</span>
-                    <span id="score" class="text-2xl font-bold text-blue-500">0</span>
+                <div class="flex items-center gap-3 bg-zinc-900/50 backdrop-blur px-6 py-3 rounded-lg border border-zinc-700/50 shadow-lg">
+                    <span class="text-zinc-400 font-medium">Score:</span>
+                    <span id="score" class="text-2xl font-bold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">0</span>
                 </div>
                 
-                <select id="difficulty" class="bg-zinc-900 border-2 border-zinc-800 text-zinc-300 rounded-lg h-11 px-4 py-2 focus:border-blue-500 focus:ring-blue-500 transition-colors">
-                    <option value="easy" class="bg-zinc-900">Easy</option>
-                    <option value="medium" selected class="bg-zinc-900">Medium</option>
-                    <option value="hard" class="bg-zinc-900">Hard</option>
+                <select id="difficulty" class="difficulty-select">
+                    <option value="easy">Easy</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="hard">Hard</option>
                 </select>
 
-                <button id="start-game" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                <button id="start-game" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all hover:shadow-lg hover:shadow-blue-500/20">
                     Start Game
                 </button>
 
-                <button id="reset-game" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors">
+                <button id="reset-game" class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-all hover:shadow-lg hover:shadow-red-500/20">
                     Reset Game
                 </button>
             </div>
@@ -72,14 +71,14 @@
                     <h2 class="text-xl font-semibold">Your Fleet</h2>
                 </div>
                 <div class="relative">
-                    <div class="absolute -left-10 top-0 bottom-0 flex flex-col justify-around grid-coordinates">
+                    <div class="absolute -left-10 top-0 bottom-0 flex flex-col justify-around text-zinc-500 text-sm">
                         @foreach(range('A', 'J') as $letter)
-                            <div class="w-6 text-right">{{ $letter }}</div>
+                            <div>{{ $letter }}</div>
                         @endforeach
                     </div>
-                    <div class="absolute -top-8 left-0 right-0 flex justify-around grid-coordinates">
+                    <div class="absolute -top-6 left-0 right-0 flex justify-around text-zinc-500 text-sm">
                         @foreach(range(1, 10) as $number)
-                            <div class="w-10 text-center">{{ $number }}</div>
+                            <div>{{ $number }}</div>
                         @endforeach
                     </div>
                     <div id="player-board" class="grid grid-cols-10 bg-zinc-900 p-2 rounded-lg border border-zinc-800">
@@ -122,6 +121,17 @@
                 </div>
             </div>
         </div>
+
+        <div class="max-w-6xl mx-auto mt-8">
+            <div class="bg-zinc-900 rounded-lg border border-zinc-800">
+                <div class="px-4 py-3 border-b border-zinc-800">
+                    <h3 class="text-lg font-semibold text-zinc-100">Battle Log</h3>
+                </div>
+                <div id="game-log" class="h-48 overflow-y-auto">
+                    <!-- Log messages will appear here -->
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Creator credits -->
@@ -143,11 +153,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const notyf = new Notyf({
-                duration: 2000,
-                position: { x: 'right', y: 'top' }
-            });
-
             let gamePhase = 'setup';
             let isHorizontal = true;
             let currentShipSize = 0;
@@ -177,10 +182,10 @@
                         currentShipSize = response.data.shipSize;
                         document.getElementById('current-ship-name').textContent = response.data.shipName;
                         updatePreviewGrid(currentShipSize);
-                        notyf.success(response.data.message);
+                        addLogMessage(response.data.message, 'success');
                     }
                 } catch (error) {
-                    notyf.error('Error starting game');
+                    addLogMessage('Error starting game', 'error');
                     console.error(error);
                 }
             });
@@ -219,17 +224,17 @@
                         if (response.data.phase === 'playing') {
                             gamePhase = 'playing';
                             document.getElementById('ship-preview').style.display = 'none';
-                            notyf.success('All ships placed! Game starting...');
+                            addLogMessage('All ships placed! Game starting...', 'success');
                             document.querySelectorAll('#ai-board button').forEach(btn => btn.disabled = false);
                         } else {
                             currentShipSize = response.data.nextShipSize;
                             document.getElementById('current-ship-name').textContent = response.data.nextShipName;
                             updatePreviewGrid(currentShipSize);
-                            notyf.success(response.data.message);
+                            addLogMessage(response.data.message, 'success');
                         }
                     }
                 } catch (error) {
-                    notyf.error(error.response?.data?.message || 'Invalid ship placement');
+                    addLogMessage('Invalid ship placement', 'error');
                 }
             });
 
@@ -258,7 +263,7 @@
                         location.reload();
                     });
                 } catch (error) {
-                    notyf.error('Error resetting game');
+                    addLogMessage('Error resetting game', 'error');
                 }
             });
 
@@ -275,7 +280,7 @@
                     e.target.disabled = true;
                     e.target.classList.remove('bg-zinc-800', 'bg-zinc-700');
                     e.target.classList.add(response.data.hit ? 'bg-red-500' : 'bg-gray-500');
-                    notyf.success(response.data.hit ? 'You hit a ship!' : 'Miss!');
+                    addLogMessage(response.data.hit ? 'You hit a ship!' : 'Miss!', 'success');
 
                     // Update score if hit
                     if (response.data.hit) {
@@ -296,9 +301,11 @@
                             playerCell.classList.add(response.data.ai_hit ? 'bg-red-500' : 'bg-gray-500');
                             playerCell.style.transition = 'background-color 0.3s ease';
                             
-                            notyf.error(response.data.ai_hit ? 
+                            addLogMessage(
+                                response.data.ai_hit ? 
                                 `AI hits your ship at ${String.fromCharCode(65 + aiX)}${aiY + 1}!` : 
-                                `AI misses at ${String.fromCharCode(65 + aiX)}${aiY + 1}`
+                                `AI misses at ${String.fromCharCode(65 + aiX)}${aiY + 1}`,
+                                'error'
                             );
                         }
                     }
@@ -314,11 +321,11 @@
                         const gameOverMessage = response.data.winner === 'Player' ? 
                             'Congratulations! You Win!' : 
                             'Game Over - AI Wins!';
-                        notyf.success(gameOverMessage);
+                        addLogMessage(gameOverMessage, 'success');
                     }
 
                 } catch (error) {
-                    notyf.error('Error processing shot');
+                    addLogMessage('Error processing shot', 'error');
                 }
             });
 
@@ -360,7 +367,20 @@
                         location.reload();
                     });
                 } catch (error) {
-                    notyf.error('Error resetting game');
+                    addLogMessage('Error resetting game', 'error');
+                }
+            }
+
+            function addLogMessage(message, type) {
+                const logContainer = document.getElementById('game-log');
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${type}`;
+                entry.textContent = message;
+                logContainer.prepend(entry);
+                
+                // Keep only last 50 messages
+                while (logContainer.children.length > 50) {
+                    logContainer.removeChild(logContainer.lastChild);
                 }
             }
         });
