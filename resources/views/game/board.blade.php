@@ -11,7 +11,7 @@
 </head>
 <body class="min-h-screen bg-zinc-950 text-zinc-50 overflow-x-hidden">
     <div class="matrix-bg"></div>
-    <!-- Game Over Modal -->
+    
     <div id="gameOverModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-zinc-900 p-8 rounded-xl shadow-xl text-center max-w-md w-full mx-4">
             <h2 class="text-4xl font-bold mb-4 rainbow-text">Game Over!</h2>
@@ -128,7 +128,7 @@
                     <h3 class="text-lg font-semibold text-zinc-100">Battle Log</h3>
                 </div>
                 <div id="game-log" class="h-48 overflow-y-auto">
-                    <!-- Log messages will appear here -->
+                    
                 </div>
             </div>
         </div>
@@ -276,19 +276,19 @@
                 try {
                     const response = await axios.post('/game/shoot', { x, y });
                     
-                    // Player's shot feedback
+                    
                     e.target.disabled = true;
                     e.target.classList.remove('bg-zinc-800', 'bg-zinc-700');
                     e.target.classList.add(response.data.hit ? 'bg-red-500' : 'bg-gray-500');
                     addLogMessage(response.data.hit ? 'You hit a ship!' : 'Miss!', 'success');
 
-                    // Update score if hit
+                    
                     if (response.data.hit) {
                         const scoreElement = document.getElementById('score');
                         scoreElement.textContent = parseInt(scoreElement.textContent) + 1;
                     }
 
-                    // Handle AI's turn immediately
+                    
                     if (response.data.ai_shot) {
                         const aiX = response.data.ai_shot.x;
                         const aiY = response.data.ai_shot.y;
@@ -310,14 +310,14 @@
                         }
                     }
 
-                    // Check for game over
+                    
                     if (response.data.gameOver) {
                         gamePhase = 'ended';
                         const score = document.getElementById('score').textContent;
                         showGameOver(response.data.winner, score);
                         document.querySelectorAll('#ai-board button').forEach(btn => btn.disabled = true);
                         
-                        // Show appropriate game over message
+                        
                         const gameOverMessage = response.data.winner === 'Player' ? 
                             'Congratulations! You Win!' : 
                             'Game Over - AI Wins!';
@@ -378,7 +378,7 @@
                 entry.textContent = message;
                 logContainer.prepend(entry);
                 
-                // Keep only last 50 messages
+                
                 while (logContainer.children.length > 50) {
                     logContainer.removeChild(logContainer.lastChild);
                 }

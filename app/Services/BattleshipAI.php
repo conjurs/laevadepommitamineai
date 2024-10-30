@@ -15,7 +15,7 @@ class BattleshipAI
     public function generateBoard()
     {
         $board = array_fill(0, self::BOARD_SIZE, array_fill(0, self::BOARD_SIZE, 0));
-        $ships = [5, 4, 3, 3, 2]; // Ship sizes
+        $ships = [5, 4, 3, 3, 2]; 
 
         foreach ($ships as $size) {
             $placed = false;
@@ -65,7 +65,7 @@ class BattleshipAI
             return $this->makeRandomShot($previousShots);
         }
 
-        // Try adjacent cells to previous hits
+        
         foreach ($hits as $hit) {
             $adjacentCells = [
                 ['x' => $hit['x'] - 1, 'y' => $hit['y']],
@@ -102,14 +102,14 @@ class BattleshipAI
 
     private function canPlaceShip(array $board, int $x, int $y, int $size, bool $horizontal): bool
     {
-        // Check if ship fits on board
+        
         if ($horizontal) {
             if ($y + $size > self::BOARD_SIZE) return false;
         } else {
             if ($x + $size > self::BOARD_SIZE) return false;
         }
 
-        // Check surrounding area including diagonals
+        
         $startX = max(0, $x - 1);
         $endX = min(9, $horizontal ? $x + 1 : $x + $size);
         $startY = max(0, $y - 1);

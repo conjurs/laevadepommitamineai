@@ -104,14 +104,14 @@ class GameController extends Controller
 
     private function canPlaceShip(array $board, int $x, int $y, int $size, bool $horizontal): bool
     {
-        // Check if ship fits on board
+        
         if ($horizontal) {
             if ($y + $size > 10) return false;
         } else {
             if ($x + $size > 10) return false;
         }
 
-        // Check surrounding area including diagonals
+        
         $startX = max(0, $x - 1);
         $endX = min(9, $horizontal ? $x + 1 : $x + $size);
         $startY = max(0, $y - 1);
@@ -154,10 +154,10 @@ class GameController extends Controller
         $playerHits = session('player_hits', []);
         $aiHits = session('ai_hits', []);
         
-        // Process player's shot
+        
         $isHit = $aiBoard[$x][$y] === 1;
         if ($isHit) {
-            $aiBoard[$x][$y] = 2; // Mark as hit
+            $aiBoard[$x][$y] = 2; 
         }
         $playerHits[] = [
             'x' => $x,
@@ -165,11 +165,11 @@ class GameController extends Controller
             'hit' => $isHit
         ];
         
-        // Process AI's shot
+        
         $aiShot = $this->ai->makeShot($aiHits);
         $aiHit = $playerBoard[$aiShot['x']][$aiShot['y']] === 1;
         if ($aiHit) {
-            $playerBoard[$aiShot['x']][$aiShot['y']] = 2; // Mark as hit
+            $playerBoard[$aiShot['x']][$aiShot['y']] = 2; 
         }
         $aiHits[] = [
             'x' => $aiShot['x'],
@@ -177,7 +177,7 @@ class GameController extends Controller
             'hit' => $aiHit
         ];
         
-        // Update session
+        
         session([
             'ai_board' => $aiBoard,
             'player_board' => $playerBoard,
@@ -185,7 +185,7 @@ class GameController extends Controller
             'ai_hits' => $aiHits
         ]);
         
-        // Check for game over
+        
         $gameOver = $this->checkGameOver($aiBoard, $playerBoard);
         
         if ($gameOver) {
@@ -210,17 +210,17 @@ class GameController extends Controller
         $aiShipsRemaining = false;
         $playerShipsRemaining = false;
 
-        // Check AI board
+        
         foreach ($aiBoard as $row) {
-            if (in_array(1, $row)) {  // If there's still an unhit ship cell
+            if (in_array(1, $row)) {  
                 $aiShipsRemaining = true;
                 break;
             }
         }
 
-        // Check player board
+        
         foreach ($playerBoard as $row) {
-            if (in_array(1, $row)) {  // If there's still an unhit ship cell
+            if (in_array(1, $row)) {  
                 $playerShipsRemaining = true;
                 break;
             }
