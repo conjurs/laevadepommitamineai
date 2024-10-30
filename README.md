@@ -55,7 +55,7 @@ A web-based Battleship game created using Laravel, featuring an AI opponent with
 
 ## Tech Stack
 
-- Laravel (Backend)
+- Laravel
 - Vanilla JavaScript
 - Tailwind CSS
 - Axios for AJAX requests
