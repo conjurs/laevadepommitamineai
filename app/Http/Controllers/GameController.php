@@ -104,17 +104,25 @@ class GameController extends Controller
 
     private function canPlaceShip(array $board, int $x, int $y, int $size, bool $horizontal): bool
     {
+        // Check if ship fits on board
         if ($horizontal) {
             if ($y + $size > 10) return false;
-            for ($i = 0; $i < $size; $i++) {
-                if ($board[$x][$y + $i] === 1) return false;
-            }
         } else {
             if ($x + $size > 10) return false;
-            for ($i = 0; $i < $size; $i++) {
-                if ($board[$x + $i][$y] === 1) return false;
+        }
+
+        // Check surrounding area including diagonals
+        $startX = max(0, $x - 1);
+        $endX = min(9, $horizontal ? $x + 1 : $x + $size);
+        $startY = max(0, $y - 1);
+        $endY = min(9, $horizontal ? $y + $size : $y + 1);
+
+        for ($i = $startX; $i <= $endX; $i++) {
+            for ($j = $startY; $j <= $endY; $j++) {
+                if ($board[$i][$j] === 1) return false;
             }
         }
+
         return true;
     }
 

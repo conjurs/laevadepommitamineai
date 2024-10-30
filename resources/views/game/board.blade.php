@@ -12,11 +12,26 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-zinc-950 text-zinc-50">
+    <!-- Game Over Modal -->
+    <div id="gameOverModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-zinc-900 p-8 rounded-xl shadow-xl text-center max-w-md w-full mx-4">
+            <h2 class="text-4xl font-bold mb-4 rainbow-text">Game Over!</h2>
+            <p id="winnerText" class="text-2xl mb-6 text-zinc-200"></p>
+            <p id="finalScore" class="text-xl mb-6 text-blue-500"></p>
+            <button onclick="window.resetGame()" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                Replay
+            </button>
+        </div>
+    </div>
+
+    <!-- Main game content -->
     <div class="container mx-auto p-8">
         <header class="flex justify-between items-center mb-12">
-            <h1 class="text-5xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-                Battleships vs AI
-            </h1>
+            <div class="title-container">
+                <h1 class="title-animate">
+                    Battleships vs AI
+                </h1>
+            </div>
             <div class="flex items-center gap-6">
                 <div class="flex items-center gap-3 bg-zinc-900 px-4 py-2 rounded-lg">
                     <span class="text-zinc-400">Score:</span>
@@ -44,7 +59,7 @@
             <div id="preview-grid" class="flex gap-1 mb-4"></div>
             <div class="flex items-center gap-4">
                 <p class="text-zinc-400">Orientation: <span id="orientation-display" class="text-zinc-200">Horizontal</span></p>
-                <button id="rotate-ship" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg transition-colors">
+                <button id="rotate-ship" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
                     Rotate Ship
                 </button>
             </div>
@@ -57,14 +72,14 @@
                     <h2 class="text-xl font-semibold">Your Fleet</h2>
                 </div>
                 <div class="relative">
-                    <div class="absolute -left-10 top-0 bottom-0 flex flex-col justify-around text-zinc-500 text-sm">
+                    <div class="absolute -left-10 top-0 bottom-0 flex flex-col justify-around grid-coordinates">
                         @foreach(range('A', 'J') as $letter)
-                            <div>{{ $letter }}</div>
+                            <div class="w-6 text-right">{{ $letter }}</div>
                         @endforeach
                     </div>
-                    <div class="absolute -top-6 left-0 right-0 flex justify-around text-zinc-500 text-sm">
+                    <div class="absolute -top-8 left-0 right-0 flex justify-around grid-coordinates">
                         @foreach(range(1, 10) as $number)
-                            <div>{{ $number }}</div>
+                            <div class="w-10 text-center">{{ $number }}</div>
                         @endforeach
                     </div>
                     <div id="player-board" class="grid grid-cols-10 bg-zinc-900 p-2 rounded-lg border border-zinc-800">
@@ -108,6 +123,23 @@
             </div>
         </div>
     </div>
+
+    <!-- Creator credits -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-zinc-900/80 backdrop-blur-sm py-4">
+        <div class="container mx-auto px-8 flex justify-between items-center">
+            <p class="text-zinc-400">Created by:</p>
+            <div class="flex items-center gap-4">
+                <a href="https://github.com/conjurs" target="_blank" class="flex items-center gap-2 text-zinc-300 hover:text-blue-500 transition-colors">
+                    <img src="https://github.com/conjurs.png" alt="conjurs" class="w-8 h-8 rounded-full">
+                    @conjurs
+                </a>
+                <a href="https://github.com/Joosepi" target="_blank" class="flex items-center gap-2 text-zinc-300 hover:text-blue-500 transition-colors">
+                    <img src="https://github.com/Joosepi.png" alt="Joosepi" class="w-8 h-8 rounded-full">
+                    @Joosepi
+                </a>
+            </div>
+        </div>
+    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -162,13 +194,6 @@
             document.getElementById('player-board').addEventListener('click', async (e) => {
                 if (gamePhase !== 'placement' || !e.target.matches('div')) return;
 
-                const now = Date.now();
-                if (now - lastClickTime < COOLDOWN_TIME) {
-                    notyf.error('Please wait before placing another ship');
-                    return;
-                }
-                lastClickTime = now;
-
                 const x = parseInt(e.target.dataset.x);
                 const y = parseInt(e.target.dataset.y);
 
@@ -185,8 +210,9 @@
                             const cellY = isHorizontal ? y + i : y;
                             const cell = document.querySelector(`div[data-x="${cellX}"][data-y="${cellY}"]`);
                             if (cell) {
-                                cell.classList.remove('bg-zinc-800');
+                                cell.classList.remove('bg-zinc-800', 'bg-zinc-700');
                                 cell.classList.add('bg-blue-500');
+                                cell.style.transition = 'background-color 0.3s ease';
                             }
                         }
 
@@ -209,8 +235,28 @@
 
             document.getElementById('reset-game').addEventListener('click', async () => {
                 try {
-                    await axios.post('/game/reset');
-                    location.reload();
+                    axios.post('/game/reset').then(() => {
+                        gamePhase = 'setup';
+                        currentShipSize = 0;
+                        isHorizontal = true;
+                        document.getElementById('score').textContent = '0';
+                        document.getElementById('ship-preview').style.display = 'block';
+                        document.getElementById('gameOverModal').classList.add('hidden');
+                        
+                        // Reset all board cells
+                        document.querySelectorAll('#player-board div').forEach(cell => {
+                            cell.classList.remove('bg-blue-500', 'bg-red-500', 'bg-gray-500');
+                            cell.classList.add('bg-zinc-800');
+                        });
+                        
+                        document.querySelectorAll('#ai-board button').forEach(btn => {
+                            btn.classList.remove('bg-red-500', 'bg-gray-500');
+                            btn.classList.add('bg-zinc-800');
+                            btn.disabled = true;
+                        });
+                        
+                        location.reload();
+                    });
                 } catch (error) {
                     notyf.error('Error resetting game');
                 }
@@ -225,10 +271,11 @@
                 try {
                     const response = await axios.post('/game/shoot', { x, y });
                     
-                    // Update the attacked cell
+                    // Player's shot feedback
                     e.target.disabled = true;
-                    e.target.classList.remove('bg-zinc-800');
+                    e.target.classList.remove('bg-zinc-800', 'bg-zinc-700');
                     e.target.classList.add(response.data.hit ? 'bg-red-500' : 'bg-gray-500');
+                    notyf.success(response.data.hit ? 'You hit a ship!' : 'Miss!');
 
                     // Update score if hit
                     if (response.data.hit) {
@@ -236,25 +283,86 @@
                         scoreElement.textContent = parseInt(scoreElement.textContent) + 1;
                     }
 
-                    // Handle AI's turn
-                    if (response.data.aiShot) {
+                    // Handle AI's turn immediately
+                    if (response.data.ai_shot) {
+                        const aiX = response.data.ai_shot.x;
+                        const aiY = response.data.ai_shot.y;
                         const playerCell = document.querySelector(
-                            `div[data-x="${response.data.aiShot.x}"][data-y="${response.data.aiShot.y}"]`
+                            `div[data-x="${aiX}"][data-y="${aiY}"]`
                         );
+                        
                         if (playerCell) {
                             playerCell.classList.remove('bg-zinc-800', 'bg-blue-500');
-                            playerCell.classList.add(response.data.aiShot.hit ? 'bg-red-500' : 'bg-gray-500');
+                            playerCell.classList.add(response.data.ai_hit ? 'bg-red-500' : 'bg-gray-500');
+                            playerCell.style.transition = 'background-color 0.3s ease';
+                            
+                            notyf.error(response.data.ai_hit ? 
+                                `AI hits your ship at ${String.fromCharCode(65 + aiX)}${aiY + 1}!` : 
+                                `AI misses at ${String.fromCharCode(65 + aiX)}${aiY + 1}`
+                            );
                         }
                     }
 
+                    // Check for game over
                     if (response.data.gameOver) {
                         gamePhase = 'ended';
-                        notyf.success(`Game Over! ${response.data.winner} wins!`);
+                        const score = document.getElementById('score').textContent;
+                        showGameOver(response.data.winner, score);
+                        document.querySelectorAll('#ai-board button').forEach(btn => btn.disabled = true);
+                        
+                        // Show appropriate game over message
+                        const gameOverMessage = response.data.winner === 'Player' ? 
+                            'Congratulations! You Win!' : 
+                            'Game Over - AI Wins!';
+                        notyf.success(gameOverMessage);
                     }
+
                 } catch (error) {
                     notyf.error('Error processing shot');
                 }
             });
+
+            function showGameOver(winner, score) {
+                const modal = document.getElementById('gameOverModal');
+                const winnerText = document.getElementById('winnerText');
+                const finalScore = document.getElementById('finalScore');
+                
+                winnerText.textContent = winner === 'Player' ? 
+                    'Congratulations! You Win!' : 
+                    'Game Over - AI Wins!';
+                
+                finalScore.textContent = `Final Score: ${score}`;
+                modal.classList.remove('hidden');
+            }
+
+            function resetGame() {
+                try {
+                    axios.post('/game/reset').then(() => {
+                        gamePhase = 'setup';
+                        currentShipSize = 0;
+                        isHorizontal = true;
+                        document.getElementById('score').textContent = '0';
+                        document.getElementById('ship-preview').style.display = 'block';
+                        document.getElementById('gameOverModal').classList.add('hidden');
+                        
+                        // Reset all board cells
+                        document.querySelectorAll('#player-board div').forEach(cell => {
+                            cell.classList.remove('bg-blue-500', 'bg-red-500', 'bg-gray-500');
+                            cell.classList.add('bg-zinc-800');
+                        });
+                        
+                        document.querySelectorAll('#ai-board button').forEach(btn => {
+                            btn.classList.remove('bg-red-500', 'bg-gray-500');
+                            btn.classList.add('bg-zinc-800');
+                            btn.disabled = true;
+                        });
+                        
+                        location.reload();
+                    });
+                } catch (error) {
+                    notyf.error('Error resetting game');
+                }
+            }
         });
     </script>
 </body>

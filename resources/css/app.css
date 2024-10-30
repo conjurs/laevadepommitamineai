@@ -23,6 +23,12 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
+    --deep-black: #000000;
+    --dark-black: #0A0A0A;
+    --royal-blue: #0051FF;
+    --royal-blue-dark: #0040CC;
+    --text-light: #FFFFFF;
+    --text-dim: #A3A3A3;
   }
 }
 
@@ -76,4 +82,232 @@
     background: #1a1a1a;
     color: #fff;
     padding: 0.5rem;
+}
+
+.ai-last-move {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+    }
+}
+
+#gameOverModal {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+footer a:hover img {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Add these new animations for the title */
+.title-animate {
+    font-size: 3.5rem;
+    font-weight: bold;
+    background: linear-gradient(
+        to right,
+        #00c6ff,
+        #0072ff,
+        #00c6ff
+    );
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: shimmer 3s linear infinite;
+    position: relative;
+}
+
+@keyframes shimmer {
+    to {
+        background-position: 200% center;
+    }
+}
+
+.title-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* Remove the previous thunder/lightning effects */
+
+/* Game boards styling */
+#player-board div, #ai-board button {
+    background-color: #27272a;
+    transition: all 0.2s ease;
+}
+
+#player-board div:hover, #ai-board button:hover:not(:disabled) {
+    background-color: #3f3f46;
+}
+
+/* Keep the game over modal animation */
+#gameOverModal {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Footer styling */
+footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+footer a:hover img {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Add these at the end of your CSS file */
+.bg-blue-500 {
+    background-color: #3b82f6 !important;
+}
+
+.bg-red-500 {
+    background-color: #ef4444 !important;
+}
+
+.bg-gray-500 {
+    background-color: #6b7280 !important;
+}
+
+#player-board div, #ai-board button {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#player-board div:hover, #ai-board button:hover:not(:disabled) {
+    background-color: #3f3f46;
+    cursor: pointer;
+}
+
+/* Add these grid styling rules */
+#player-board, #ai-board {
+    gap: 4px;
+    padding: 12px;
+    background: #18181b;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+#player-board div, #ai-board button {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    border: 2px solid #27272a;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+#player-board div:hover, #ai-board button:hover:not(:disabled) {
+    transform: scale(1.05);
+    border-color: #3b82f6;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+}
+
+.bg-blue-500 {
+    background-color: #3b82f6 !important;
+    border-color: #2563eb !important;
+}
+
+.bg-red-500 {
+    background-color: #ef4444 !important;
+    border-color: #dc2626 !important;
+}
+
+.bg-gray-500 {
+    background-color: #6b7280 !important;
+    border-color: #4b5563 !important;
+}
+
+/* Grid coordinates styling */
+.grid-coordinates {
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+body {
+    background-color: var(--deep-black);
+}
+
+/* Update UI elements */
+.bg-zinc-900 {
+    background-color: var(--dark-black) !important;
+}
+
+.bg-zinc-800 {
+    background-color: var(--dark-black) !important;
+}
+
+.border-zinc-800 {
+    border-color: var(--royal-blue-dark) !important;
+}
+
+.bg-blue-600 {
+    background-color: var(--royal-blue) !important;
+}
+
+.bg-blue-700:hover {
+    background-color: var(--royal-blue-dark) !important;
+}
+
+/* Update game boards container */
+#player-board, #ai-board {
+    background-color: var(--dark-black);
+    border-color: var(--royal-blue-dark);
+}
+
+/* Update difficulty select */
+.difficulty-select {
+    background-color: var(--dark-black);
+    border-color: var(--royal-blue-dark);
+}
+
+.difficulty-select:hover {
+    border-color: var(--royal-blue);
+    background-color: var(--dark-black);
+}
+
+.difficulty-select option {
+    background-color: var(--dark-black);
+}
+
+/* Update footer */
+footer {
+    background-color: var(--dark-black);
+    border-color: var(--royal-blue-dark);
 }
