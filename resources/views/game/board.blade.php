@@ -1,241 +1,258 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Battleships vs AI</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto p-4">
+<body class="min-h-screen bg-zinc-950 text-zinc-50">
+    <div class="container mx-auto p-8">
+        <header class="flex justify-between items-center mb-12">
+            <h1 class="text-5xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+                Battleships vs AI
+            </h1>
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-3 bg-zinc-900 px-4 py-2 rounded-lg">
+                    <span class="text-zinc-400">Score:</span>
+                    <span id="score" class="text-2xl font-bold text-blue-500">0</span>
+                </div>
+                
+                <select id="difficulty" class="bg-zinc-900 border-2 border-zinc-800 text-zinc-300 rounded-lg h-11 px-4 py-2 focus:border-blue-500 focus:ring-blue-500 transition-colors">
+                    <option value="easy" class="bg-zinc-900">Easy</option>
+                    <option value="medium" selected class="bg-zinc-900">Medium</option>
+                    <option value="hard" class="bg-zinc-900">Hard</option>
+                </select>
 
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold">Battleships vs AI</h1>
-            <div class="flex gap-4">
-                <div class="text-xl font-semibold">Score: <span id="score">0</span></div>
-                <button id="start-game" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                <button id="start-game" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
                     Start Game
                 </button>
-                <button id="reset-game" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">
+
+                <button id="reset-game" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors">
                     Reset Game
                 </button>
             </div>
-        </div>
+        </header>
 
-        <div class="max-w-[1000px] mx-auto mb-8" id="ship-preview">
-            <h3 class="text-lg font-semibold">Current Ship: <span id="current-ship-name"></span></h3>
-            <div class="flex gap-1 my-2" id="preview-grid"></div>
-            <div class="flex gap-4 items-center">
-                <p class="text-sm text-gray-600">Orientation: <span id="orientation-display">Horizontal</span></p>
-                <button id="rotate-ship" class="px-3 py-1 bg-purple-500 text-white text-sm rounded hover:bg-purple-600">
+        <div id="ship-preview" class="mb-8 bg-zinc-900 rounded-xl border border-zinc-800 p-6">
+            <h3 class="text-xl font-semibold mb-4">Current Ship: <span id="current-ship-name" class="text-blue-500"></span></h3>
+            <div id="preview-grid" class="flex gap-1 mb-4"></div>
+            <div class="flex items-center gap-4">
+                <p class="text-zinc-400">Orientation: <span id="orientation-display" class="text-zinc-200">Horizontal</span></p>
+                <button id="rotate-ship" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg transition-colors">
                     Rotate Ship
                 </button>
             </div>
         </div>
 
-        <!-- Game Grid -->
-        <div class="grid grid-cols-2 gap-12 max-w-[1000px] mx-auto">
-            <!-- Player Section -->
-            <div>
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold">Your Board</h2>
-                    <div id="cooldown" class="hidden text-lg font-semibold text-blue-600"></div>
+        <div class="grid grid-cols-2 gap-16 max-w-6xl mx-auto">
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <h2 class="text-xl font-semibold">Your Fleet</h2>
                 </div>
-                
-                <!-- Player Board -->
-                <div class="w-[400px] h-[400px] grid grid-cols-10 grid-rows-10" id="player-board">
-                    @for ($i = 0; $i < 10; $i++)
-                        @for ($j = 0; $j < 10; $j++)
-                            <div 
-                                class="border border-gray-300 bg-blue-200 cursor-pointer hover:bg-blue-300 transition-colors"
-                                data-x="{{ $i }}"
-                                data-y="{{ $j }}"
-                            ></div>
+                <div class="relative">
+                    <div class="absolute -left-10 top-0 bottom-0 flex flex-col justify-around text-zinc-500 text-sm">
+                        @foreach(range('A', 'J') as $letter)
+                            <div>{{ $letter }}</div>
+                        @endforeach
+                    </div>
+                    <div class="absolute -top-6 left-0 right-0 flex justify-around text-zinc-500 text-sm">
+                        @foreach(range(1, 10) as $number)
+                            <div>{{ $number }}</div>
+                        @endforeach
+                    </div>
+                    <div id="player-board" class="grid grid-cols-10 bg-zinc-900 p-2 rounded-lg border border-zinc-800">
+                        @for ($i = 0; $i < 10; $i++)
+                            @for ($j = 0; $j < 10; $j++)
+                                <div data-x="{{ $i }}" data-y="{{ $j }}" 
+                                     class="w-10 h-10 rounded bg-zinc-800 hover:bg-zinc-700 transition-colors border border-zinc-900">
+                                </div>
+                            @endfor
                         @endfor
-                    @endfor
+                    </div>
                 </div>
             </div>
-            
-            <!-- Enemy Section -->
-            <div>
-                <h2 class="text-xl font-semibold mb-4">Enemy Board</h2>
-                <div class="w-[400px] h-[400px] grid grid-cols-10 grid-rows-10" id="ai-board">
-                    @for ($i = 0; $i < 10; $i++)
-                        @for ($j = 0; $j < 10; $j++)
-                            <button 
-                                class="border border-gray-300 bg-blue-200 hover:bg-blue-300 transition-colors"
-                                data-x="{{ $i }}"
-                                data-y="{{ $j }}"
-                                disabled
-                            ></button>
-                        @endfor
-                    @endfor
-                </div>
-            </div>
-        </div>
 
-        <!-- Game Over Modal -->
-        <div id="game-over-modal" class="hidden fixed inset-0 z-50">
-            <div class="absolute inset-0 bg-black bg-opacity-50"></div>
-            <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
-                <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
-                    <h2 class="text-2xl font-bold mb-4">Game Over!</h2>
-                    <p class="text-xl mb-4">Winner: <span id="winner"></span></p>
-                    <p class="text-lg mb-4">Final Score: <span id="final-score"></span></p>
-                    <button onclick="location.reload()" class="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                        Play Again
-                    </button>
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <h2 class="text-xl font-semibold">Enemy Fleet</h2>
+                </div>
+                <div class="relative">
+                    <div class="absolute -left-10 top-0 bottom-0 flex flex-col justify-around text-zinc-500 text-sm">
+                        @foreach(range('A', 'J') as $letter)
+                            <div>{{ $letter }}</div>
+                        @endforeach
+                    </div>
+                    <div class="absolute -top-6 left-0 right-0 flex justify-around text-zinc-500 text-sm">
+                        @foreach(range(1, 10) as $number)
+                            <div>{{ $number }}</div>
+                        @endforeach
+                    </div>
+                    <div id="ai-board" class="grid grid-cols-10 bg-zinc-900 p-2 rounded-lg border border-zinc-800">
+                        @for ($i = 0; $i < 10; $i++)
+                            @for ($j = 0; $j < 10; $j++)
+                                <button data-x="{{ $i }}" data-y="{{ $j }}" disabled 
+                                        class="w-10 h-10 rounded bg-zinc-800 hover:bg-zinc-700 transition-colors border border-zinc-900">
+                                </button>
+                            @endfor
+                        @endfor
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <style>
-        @media (max-width: 1024px) {
-            #player-board, #ai-board {
-                width: 100% !important;
-                height: auto !important;
-                aspect-ratio: 1 / 1;
-            }
-        }
-    </style>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', () => {
             const notyf = new Notyf({
                 duration: 2000,
                 position: { x: 'right', y: 'top' }
             });
-            
+
+            let gamePhase = 'setup';
             let isHorizontal = true;
             let currentShipSize = 0;
-            let gamePhase = 'setup';
-            
-            const startButton = document.getElementById('start-game');
-            const resetButton = document.getElementById('reset-game');
-            const playerBoard = document.getElementById('player-board');
-            const aiBoard = document.getElementById('ai-board');
-            const rotateButton = document.getElementById('rotate-ship');
-            const shipPreview = document.getElementById('ship-preview');
-            const previewGrid = document.getElementById('preview-grid');
-            
+            let lastClickTime = 0;
+            const COOLDOWN_TIME = 1000;
+
             function updatePreviewGrid(size) {
+                const previewGrid = document.getElementById('preview-grid');
                 previewGrid.innerHTML = '';
-                currentShipSize = size;
+                previewGrid.style.display = 'flex';
+                previewGrid.style.flexDirection = isHorizontal ? 'row' : 'column';
                 
                 for (let i = 0; i < size; i++) {
                     const cell = document.createElement('div');
-                    cell.className = 'w-8 h-8 bg-blue-500 border border-gray-300';
+                    cell.className = 'w-10 h-10 bg-blue-500 rounded border border-blue-600';
                     previewGrid.appendChild(cell);
                 }
-                
-                previewGrid.style.flexDirection = isHorizontal ? 'row' : 'column';
             }
-            
-            rotateButton.addEventListener('click', () => {
-                isHorizontal = !isHorizontal;
-                document.getElementById('orientation-display').textContent = isHorizontal ? 'Horizontal' : 'Vertical';
-                if (currentShipSize > 0) {
-                    updatePreviewGrid(currentShipSize);
-                }
-                notyf.success(`Orientation: ${isHorizontal ? 'Horizontal' : 'Vertical'}`);
-            });
-            
-            startButton.addEventListener('click', async () => {
+
+            document.getElementById('start-game').addEventListener('click', async () => {
                 try {
-                    const response = await axios.post('/game/start');
-                    startButton.disabled = true;
-                    shipPreview.style.display = 'block';
-                    gamePhase = 'placement';
+                    const difficulty = document.getElementById('difficulty').value;
+                    const response = await axios.post('/game/start', { difficulty });
                     
-                    // Update ship preview
-                    document.getElementById('current-ship-name').textContent = response.data.shipName;
-                    updatePreviewGrid(response.data.shipSize);
-                    
-                    notyf.success(response.data.message);
+                    if (response.data.status === 'success') {
+                        gamePhase = 'placement';
+                        currentShipSize = response.data.shipSize;
+                        document.getElementById('current-ship-name').textContent = response.data.shipName;
+                        updatePreviewGrid(currentShipSize);
+                        notyf.success(response.data.message);
+                    }
                 } catch (error) {
                     notyf.error('Error starting game');
+                    console.error(error);
                 }
             });
-            
-            let lastClickTime = 0;
-            const COOLDOWN_TIME = 1000; // 1 second cooldown
 
-            playerBoard.addEventListener('click', async (e) => {
+            document.getElementById('rotate-ship').addEventListener('click', () => {
+                isHorizontal = !isHorizontal;
+                document.getElementById('orientation-display').textContent = isHorizontal ? 'Horizontal' : 'Vertical';
+                updatePreviewGrid(currentShipSize);
+            });
+
+            document.getElementById('player-board').addEventListener('click', async (e) => {
                 if (gamePhase !== 'placement' || !e.target.matches('div')) return;
-                
+
                 const now = Date.now();
                 if (now - lastClickTime < COOLDOWN_TIME) {
                     notyf.error('Please wait before placing another ship');
                     return;
                 }
                 lastClickTime = now;
-                
+
                 const x = parseInt(e.target.dataset.x);
                 const y = parseInt(e.target.dataset.y);
-                
+
                 try {
                     const response = await axios.post('/game/place-ship', {
                         x,
                         y,
                         horizontal: isHorizontal
                     });
-                    
-                    // Place ship on board
-                    const shipSize = currentShipSize;
-                    for (let i = 0; i < shipSize; i++) {
-                        const cellX = isHorizontal ? x : x + i;
-                        const cellY = isHorizontal ? y + i : y;
-                        const cell = playerBoard.querySelector(`div[data-x="${cellX}"][data-y="${cellY}"]`);
-                        if (cell) {
-                            cell.classList.remove('bg-blue-200', 'hover:bg-blue-300');
-                            cell.classList.add('bg-blue-500');
+
+                    if (response.data.status === 'success') {
+                        for (let i = 0; i < currentShipSize; i++) {
+                            const cellX = isHorizontal ? x : x + i;
+                            const cellY = isHorizontal ? y + i : y;
+                            const cell = document.querySelector(`div[data-x="${cellX}"][data-y="${cellY}"]`);
+                            if (cell) {
+                                cell.classList.remove('bg-zinc-800');
+                                cell.classList.add('bg-blue-500');
+                            }
+                        }
+
+                        if (response.data.phase === 'playing') {
+                            gamePhase = 'playing';
+                            document.getElementById('ship-preview').style.display = 'none';
+                            notyf.success('All ships placed! Game starting...');
+                            document.querySelectorAll('#ai-board button').forEach(btn => btn.disabled = false);
+                        } else {
+                            currentShipSize = response.data.nextShipSize;
+                            document.getElementById('current-ship-name').textContent = response.data.nextShipName;
+                            updatePreviewGrid(currentShipSize);
+                            notyf.success(response.data.message);
                         }
                     }
-                    
-                    if (response.data.phase === 'playing') {
-                        notyf.success('All ships placed! Game starting...');
-                        shipPreview.style.display = 'none';
-                        gamePhase = 'playing';
-                        enableAIBoard();
-                    } else {
-                        notyf.success(`Placed ${response.data.shipSize}-square ship`);
-                        updatePreviewGrid(response.data.nextShipSize);
-                        document.getElementById('current-ship-name').textContent = response.data.nextShipName;
-                    }
                 } catch (error) {
-                    notyf.error(error.response?.data?.message || 'Cannot place ship here');
+                    notyf.error(error.response?.data?.message || 'Invalid ship placement');
                 }
             });
-            
-            resetButton.addEventListener('click', async () => {
+
+            document.getElementById('reset-game').addEventListener('click', async () => {
                 try {
-                    gamePhase = 'setup';
-                    currentShipSize = 0;
-                    isHorizontal = true;
-                    
-                    // Reset UI elements
-                    startButton.disabled = false;
-                    shipPreview.style.display = 'none';
-                    document.getElementById('current-ship-name').textContent = '';
-                    document.getElementById('orientation-display').textContent = 'Horizontal';
-                    document.getElementById('score').textContent = '0';
-                    
-                    // Reset boards
-                    const cells = document.querySelectorAll('#player-board div, #ai-board button');
-                    cells.forEach(cell => {
-                        cell.className = 'border border-gray-300 bg-blue-200 hover:bg-blue-300 transition-colors';
-                        if (cell.tagName === 'BUTTON') cell.disabled = true;
-                    });
-                    
-                    // Reset server state
                     await axios.post('/game/reset');
-                    notyf.success('Game Reset');
+                    location.reload();
                 } catch (error) {
                     notyf.error('Error resetting game');
+                }
+            });
+
+            document.getElementById('ai-board').addEventListener('click', async (e) => {
+                if (gamePhase !== 'playing' || !e.target.matches('button') || e.target.disabled) return;
+
+                const x = parseInt(e.target.dataset.x);
+                const y = parseInt(e.target.dataset.y);
+
+                try {
+                    const response = await axios.post('/game/shoot', { x, y });
+                    
+                    // Update the attacked cell
+                    e.target.disabled = true;
+                    e.target.classList.remove('bg-zinc-800');
+                    e.target.classList.add(response.data.hit ? 'bg-red-500' : 'bg-gray-500');
+
+                    // Update score if hit
+                    if (response.data.hit) {
+                        const scoreElement = document.getElementById('score');
+                        scoreElement.textContent = parseInt(scoreElement.textContent) + 1;
+                    }
+
+                    // Handle AI's turn
+                    if (response.data.aiShot) {
+                        const playerCell = document.querySelector(
+                            `div[data-x="${response.data.aiShot.x}"][data-y="${response.data.aiShot.y}"]`
+                        );
+                        if (playerCell) {
+                            playerCell.classList.remove('bg-zinc-800', 'bg-blue-500');
+                            playerCell.classList.add(response.data.aiShot.hit ? 'bg-red-500' : 'bg-gray-500');
+                        }
+                    }
+
+                    if (response.data.gameOver) {
+                        gamePhase = 'ended';
+                        notyf.success(`Game Over! ${response.data.winner} wins!`);
+                    }
+                } catch (error) {
+                    notyf.error('Error processing shot');
                 }
             });
         });

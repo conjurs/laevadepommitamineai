@@ -4,16 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Services\BattleshipAI;
 use Illuminate\Http\Request;
+use App\Models\GameRecord;
 
 class GameController extends Controller
 {
     private BattleshipAI $ai;
     private const SHIPS = [
-        ['size' => 5, 'name' => 'Aircraft Carrier'],
-        ['size' => 4, 'name' => 'Battleship'],
-        ['size' => 3, 'name' => 'Submarine'],
-        ['size' => 3, 'name' => 'Destroyer'],
-        ['size' => 2, 'name' => 'Patrol Boat']
+        ['name' => 'Carrier', 'size' => 5],
+        ['name' => 'Battleship', 'size' => 4],
+        ['name' => 'Cruiser', 'size' => 3],
+        ['name' => 'Submarine', 'size' => 3],
+        ['name' => 'Destroyer', 'size' => 2]
     ];
 
     public function __construct(BattleshipAI $ai)
@@ -28,80 +29,77 @@ class GameController extends Controller
         ]);
     }
 
-    public function start()
+    public function start(Request $request)
     {
-        $aiBoard = $this->ai->generateBoard();
-        session([
-            'ai_board' => $aiBoard,
-            'player_board' => array_fill(0, 10, array_fill(0, 10, 0)),
-            'player_hits' => [],
-            'ai_hits' => [],
-            'current_ship' => 0,
-            'game_phase' => 'placement'
-        ]);
-        
-        return response()->json([
-            'message' => 'Place your ' . self::SHIPS[0]['name'],
-            'shipName' => self::SHIPS[0]['name'],
-            'shipSize' => self::SHIPS[0]['size'],
-            'status' => 'success'
-        ]);
+        try {
+            $difficulty = $request->input('difficulty', 'medium');
+            $this->ai = new BattleshipAI($difficulty);
+            
+            $aiBoard = $this->ai->generateBoard();
+            session([
+                'ai_board' => $aiBoard,
+                'player_board' => array_fill(0, 10, array_fill(0, 10, 0)),
+                'player_hits' => [],
+                'ai_hits' => [],
+                'current_ship' => 0,
+                'game_phase' => 'placement',
+                'difficulty' => $difficulty,
+                'score' => 0
+            ]);
+            
+            return response()->json([
+                'message' => 'Place your ' . self::SHIPS[0]['name'],
+                'shipName' => self::SHIPS[0]['name'],
+                'shipSize' => self::SHIPS[0]['size'],
+                'status' => 'success'
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Error starting game'], 500);
+        }
     }
 
     public function placeShip(Request $request)
     {
-        $x = $request->input('x');
-        $y = $request->input('y');
-        $isHorizontal = $request->input('horizontal');
-        $currentShipIndex = session('current_ship', 0);
-        $playerBoard = session('player_board');
+        try {
+            $x = $request->input('x');
+            $y = $request->input('y');
+            $isHorizontal = $request->input('horizontal');
+            $currentShipIndex = session('current_ship', 0);
+            $playerBoard = session('player_board');
 
-        // Validate current ship index
-        if ($currentShipIndex >= count(self::SHIPS)) {
-            session(['game_phase' => 'playing']);
+            if ($currentShipIndex >= count(self::SHIPS)) {
+                return response()->json(['error' => 'All ships placed'], 400);
+            }
+
+            $currentShip = self::SHIPS[$currentShipIndex];
+            
+            if (!$this->canPlaceShip($playerBoard, $x, $y, $currentShip['size'], $isHorizontal)) {
+                return response()->json(['error' => 'Invalid ship placement'], 400);
+            }
+
+            $playerBoard = $this->placeShipOnBoard($playerBoard, $x, $y, $currentShip['size'], $isHorizontal);
+            $currentShipIndex++;
+
+            session(['player_board' => $playerBoard, 'current_ship' => $currentShipIndex]);
+
+            if ($currentShipIndex >= count(self::SHIPS)) {
+                session(['game_phase' => 'playing']);
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'All ships placed!',
+                    'phase' => 'playing'
+                ]);
+            }
+
             return response()->json([
-                'message' => 'All ships already placed',
-                'phase' => 'playing',
-                'status' => 'success'
-            ]);
-        }
-
-        $currentShip = self::SHIPS[$currentShipIndex];
-        
-        // Validate ship placement
-        if (!$this->canPlaceShip($playerBoard, $x, $y, $currentShip['size'], $isHorizontal)) {
-            return response()->json([
-                'error' => 'Invalid position',
-                'message' => 'Cannot place ship here'
-            ], 400);
-        }
-
-        // Place the ship
-        $playerBoard = $this->placeShipOnBoard($playerBoard, $x, $y, $currentShip['size'], $isHorizontal);
-        $currentShipIndex++;
-        
-        session(['player_board' => $playerBoard, 'current_ship' => $currentShipIndex]);
-
-        // Check if all ships are placed
-        if ($currentShipIndex >= count(self::SHIPS)) {
-            session(['game_phase' => 'playing']);
-            return response()->json([
-                'message' => 'All ships placed! Game starting...',
-                'phase' => 'playing',
                 'status' => 'success',
-                'shipSize' => $currentShip['size']
+                'message' => 'Ship placed! Place your ' . self::SHIPS[$currentShipIndex]['name'],
+                'nextShipName' => self::SHIPS[$currentShipIndex]['name'],
+                'nextShipSize' => self::SHIPS[$currentShipIndex]['size']
             ]);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Error placing ship'], 500);
         }
-
-        // Return next ship info
-        $nextShip = self::SHIPS[$currentShipIndex];
-        return response()->json([
-            'message' => 'Place your ' . $nextShip['name'],
-            'shipSize' => $nextShip['size'],
-            'nextShipName' => $nextShip['name'],
-            'nextShipSize' => $nextShip['size'],
-            'status' => 'success'
-        ]);
     }
 
     private function canPlaceShip(array $board, int $x, int $y, int $size, bool $horizontal): bool
@@ -144,23 +142,47 @@ class GameController extends Controller
         $y = $request->input('y');
         
         $aiBoard = session('ai_board');
+        $playerBoard = session('player_board');
         $playerHits = session('player_hits', []);
+        $aiHits = session('ai_hits', []);
         
+        // Process player's shot
         $isHit = $aiBoard[$x][$y] === 1;
+        if ($isHit) {
+            $aiBoard[$x][$y] = 2; // Mark as hit
+        }
         $playerHits[] = [
             'x' => $x,
             'y' => $y,
             'hit' => $isHit
         ];
         
-        session(['player_hits' => $playerHits]);
-        
-        $aiShot = $this->ai->makeShot(session('ai_hits', []));
-        $playerBoard = session('player_board');
+        // Process AI's shot
+        $aiShot = $this->ai->makeShot($aiHits);
         $aiHit = $playerBoard[$aiShot['x']][$aiShot['y']] === 1;
+        if ($aiHit) {
+            $playerBoard[$aiShot['x']][$aiShot['y']] = 2; // Mark as hit
+        }
+        $aiHits[] = [
+            'x' => $aiShot['x'],
+            'y' => $aiShot['y'],
+            'hit' => $aiHit
+        ];
+        
+        // Update session
+        session([
+            'ai_board' => $aiBoard,
+            'player_board' => $playerBoard,
+            'player_hits' => $playerHits,
+            'ai_hits' => $aiHits
+        ]);
         
         // Check for game over
         $gameOver = $this->checkGameOver($aiBoard, $playerBoard);
+        
+        if ($gameOver) {
+            session(['game_phase' => 'ended']);
+        }
         
         return response()->json([
             'hit' => $isHit,
@@ -169,7 +191,9 @@ class GameController extends Controller
             'ai_hit' => $aiHit,
             'ai_message' => $aiHit ? 'AI Hit!' : 'AI Miss!',
             'gameOver' => $gameOver !== false,
-            'winner' => $gameOver
+            'winner' => $gameOver,
+            'playerHitCount' => collect($playerHits)->where('hit', true)->count(),
+            'aiHitCount' => collect($aiHits)->where('hit', true)->count()
         ]);
     }
 
@@ -178,15 +202,17 @@ class GameController extends Controller
         $aiShipsRemaining = false;
         $playerShipsRemaining = false;
 
+        // Check AI board
         foreach ($aiBoard as $row) {
-            if (in_array(1, $row)) {
+            if (in_array(1, $row)) {  // If there's still an unhit ship cell
                 $aiShipsRemaining = true;
                 break;
             }
         }
 
+        // Check player board
         foreach ($playerBoard as $row) {
-            if (in_array(1, $row)) {
+            if (in_array(1, $row)) {  // If there's still an unhit ship cell
                 $playerShipsRemaining = true;
                 break;
             }
@@ -212,5 +238,27 @@ class GameController extends Controller
             'status' => 'success',
             'message' => 'Game reset successfully'
         ]);
+    }
+
+    private function saveGameRecord($winner)
+    {
+        GameRecord::create([
+            'difficulty' => session('difficulty', 'medium'),
+            'player_hits' => collect(session('player_hits'))->where('hit', true)->count(),
+            'ai_hits' => collect(session('ai_hits'))->where('hit', true)->count(),
+            'winner' => $winner,
+            'player_moves' => session('player_hits'),
+            'ai_moves' => session('ai_hits'),
+            'score' => session('score', 0)
+        ]);
+    }
+
+    public function history()
+    {
+        $records = GameRecord::orderBy('created_at', 'desc')
+            ->take(10)
+            ->get();
+        
+        return view('game.history', compact('records'));
     }
 } 

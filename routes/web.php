@@ -8,3 +8,4 @@ Route::post('/game/start', [GameController::class, 'start']);
 Route::post('/game/place-ship', [GameController::class, 'placeShip']);
 Route::post('/game/shoot', [GameController::class, 'shoot']);
 Route::post('/game/reset', [GameController::class, 'reset']);
+Route::get('/game/history', [GameController::class, 'history']);
