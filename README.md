@@ -50,7 +50,6 @@ A web-based Battleship game created using Laravel, featuring an AI opponent with
 ### Additional Features
 - [ ] Add sound effects
 - [ ] Implement game statistics
-- [ ] Add local multiplayer option
 - [ ] Save game progress
 
 ## Tech Stack

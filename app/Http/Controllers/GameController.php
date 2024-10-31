@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\BattleshipAI;
 use Illuminate\Http\Request;
 use App\Models\GameRecord;
+use Illuminate\Support\Facades\Auth;
 
 class GameController extends Controller
 {
@@ -268,5 +269,18 @@ class GameController extends Controller
             ->get();
         
         return view('game.history', compact('records'));
+    }
+
+    private function updateLeaderboard($winner)
+    {
+        if (Auth::check()) {
+            $leaderboardController = new LeaderboardController();
+            $leaderboardController->updateStats(
+                Auth::id(),
+                session('difficulty', 'medium'),
+                $winner === 'Player',
+                session('score', 0)
+            );
+        }
     }
 } 

@@ -716,3 +716,62 @@ footer {
 .bg-red-500, .bg-gray-500 {
     transition: all 0.2s ease-in-out !important;
 }
+
+/* Header Styles */
+header {
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.difficulty-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Button hover effects */
+button, a {
+    transform: translateY(0);
+    transition: all 0.2s ease;
+}
+
+button:hover, a:hover {
+    transform: translateY(-1px);
+}
+
+button:active, a:active {
+    transform: translateY(0);
+}
+
+/* Header button styles */
+.header-btn {
+    transform: translateY(0);
+    transition: all 0.2s ease;
+}
+
+.header-btn:hover {
+    transform: translateY(-1px);
+}
+
+.header-btn:active {
+    transform: translateY(0);
+}
+
+/* Difficulty select styles */
+#difficulty {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+#difficulty option {
+    background-color: rgb(24, 24, 27);
+    color: rgb(244, 244, 245);
+}
