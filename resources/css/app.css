@@ -114,7 +114,7 @@ footer a:hover img {
     transition: transform 0.2s ease;
 }
 
-/* Add these new animations for the title */
+
 .title-animate {
     font-size: 3.5rem;
     font-weight: bold;
@@ -143,7 +143,7 @@ footer a:hover img {
     display: inline-block;
 }
 
-/* Remove the previous thunder/lightning effects */
+
 
 
 #player-board div:hover, #ai-board button:hover:not(:disabled) {
@@ -151,7 +151,7 @@ footer a:hover img {
     cursor: pointer;
 }
 
-/* Keep the game over modal animation */
+
 #gameOverModal {
     animation: fadeIn 0.3s ease-out;
 }
@@ -167,7 +167,7 @@ footer a:hover img {
     }
 }
 
-/* Footer styling */
+
 footer {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -177,7 +177,7 @@ footer a:hover img {
     transition: transform 0.2s ease;
 }
 
-/* Add these at the end of your CSS file */
+
 .bg-blue-500 {
     background-color: #3b82f6 !important;
 }
@@ -200,7 +200,7 @@ footer a:hover img {
         0 0 2px rgba(59, 130, 246, 0.1);
 }
 
-/* Hover effects */
+
 #player-board div:hover, #ai-board button:hover:not(:disabled) {
     background-color: rgba(30, 30, 30, 0.95);
     border-color: rgba(59, 130, 246, 0.4);
@@ -227,7 +227,7 @@ footer a:hover img {
     border-color: #4b5563 !important;
 }
 
-/* Grid coordinates styling */
+
 .grid-coordinates {
     color: #6b7280;
     font-size: 0.875rem;
@@ -240,7 +240,7 @@ body {
     background-color: var(--deep-black);
 }
 
-/* Update UI elements */
+
 .bg-zinc-900 {
     background-color: var(--dark-black) !important;
 }
@@ -261,13 +261,13 @@ body {
     background-color: var(--royal-blue-dark) !important;
 }
 
-/* Update game boards container */
+
 #player-board, #ai-board {
     background-color: var(--dark-black);
     border-color: var(--royal-blue-dark);
 }
 
-/* Update difficulty select */
+
 .difficulty-select {
     background-color: var(--dark-black);
     border-color: var(--royal-blue-dark);
@@ -282,13 +282,12 @@ body {
     background-color: var(--dark-black);
 }
 
-/* Update footer */
 footer {
     background-color: var(--dark-black);
     border-color: var(--royal-blue-dark);
 }
 
-/* Lightning effect */
+
 .lightning-container {
     position: fixed;
     top: 0;
@@ -344,7 +343,7 @@ footer {
     }
 }
 
-/* Thunder effect */
+
 .thunder-background {
     position: fixed;
     top: 0;
@@ -407,7 +406,7 @@ footer {
 }
 
 
-/* Grid coordinates styling */
+
 .grid-coordinates {
     color: #6b7280;
     font-size: 0.875rem;
@@ -469,7 +468,7 @@ footer {
     transform: translateX(-4px);
 }
 
-/* Hover effects */
+
 #player-board div:hover, #ai-board button:hover:not(:disabled) {
     background-color: rgb(63, 63, 70);
     cursor: pointer;
@@ -494,7 +493,7 @@ footer {
         0 0 8px rgba(107, 114, 128, 0.4) !important;
 }
 
-/* Custom Notification Styling */
+
 .notyf__toast {
     border-radius: 8px !important;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
@@ -602,7 +601,7 @@ footer {
     margin-left: 1.25rem;
 }
 
-/* Ensure consistent cell sizing */
+
 #ai-board button {
     width: 2.75rem;
     height: 2.75rem;
@@ -613,7 +612,6 @@ footer {
 }
 
 
-/* Ensure the letters are properly aligned with grid cells */
 #ai-board button {
     width: 2.75rem;
     height: 2.75rem;
@@ -638,7 +636,7 @@ footer {
     background-color: rgb(63, 63, 70);
 }
 
-/* Grid coordinates */
+
 .absolute.-left-4 {
     width: 1rem;
     right: calc(100% + 0.5rem);
@@ -649,7 +647,7 @@ footer {
     bottom: calc(100% + 0.25rem);
 }
 
-/* Grid container styling */
+
 #player-board, #ai-board {
     display: grid;
     grid-template-columns: repeat(10, 3rem);
@@ -661,7 +659,7 @@ footer {
     width: fit-content;
 }
 
-/* Fix the number spacing */
+
 .absolute.-top-8 {
     height: 1.5rem;
     bottom: calc(100% + 0.25rem);
@@ -683,7 +681,7 @@ footer {
     transform: translateX(-4px);
 }
 
-/* Grid cells */
+
 #player-board div, #ai-board button {
     width: 3rem;
     height: 3rem;
@@ -693,7 +691,7 @@ footer {
     transition: all 0.2s ease;
 }
 
-/* Grid coordinates */
+
 .absolute.-left-8 {
     width: 2rem;
     right: calc(100% + 0.5rem);
@@ -704,7 +702,7 @@ footer {
     bottom: calc(100% + 0.5rem);
 }
 
-/* Hover effects */
+
 #player-board div:hover, #ai-board button:hover:not(:disabled) {
     background-color: rgb(63, 63, 70);
     cursor: pointer;

@@ -134,7 +134,7 @@
         </div>
     </div>
 
-    <!-- Creator credits -->
+   
     <footer class="fixed bottom-0 left-0 right-0 bg-zinc-900/80 backdrop-blur-sm py-4">
         <div class="container mx-auto px-8 flex justify-between items-center">
             <p class="text-zinc-400">Created by:</p>
@@ -248,7 +248,7 @@
                         document.getElementById('ship-preview').style.display = 'block';
                         document.getElementById('gameOverModal').classList.add('hidden');
                         
-                        // Reset all board cells
+                        
                         document.querySelectorAll('#player-board div').forEach(cell => {
                             cell.classList.remove('bg-blue-500', 'bg-red-500', 'bg-gray-500');
                             cell.classList.add('bg-zinc-800');
@@ -279,7 +279,7 @@
                     e.target.disabled = true;
                     e.target.classList.remove('bg-zinc-800', 'bg-zinc-700', 'hover:bg-zinc-700');
                     
-                    // Add a small delay to ensure proper transition
+                    
                     setTimeout(() => {
                         e.target.classList.add(response.data.hit ? 'bg-red-500' : 'bg-gray-500');
                     }, 50);
@@ -352,7 +352,7 @@
                         document.getElementById('ship-preview').style.display = 'block';
                         document.getElementById('gameOverModal').classList.add('hidden');
                         
-                        // Reset all board cells
+                       
                         document.querySelectorAll('#player-board div').forEach(cell => {
                             cell.classList.remove('bg-blue-500', 'bg-red-500', 'bg-gray-500');
                             cell.classList.add('bg-zinc-800');
