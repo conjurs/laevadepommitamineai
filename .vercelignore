@@ -1,1 +1,8 @@
 /vendor
+/node_modules
+.env
+.env.*
+*.log
+.git
+.gitignore
+.gitattributes
