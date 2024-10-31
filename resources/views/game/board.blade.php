@@ -17,8 +17,8 @@
             <h2 class="text-4xl font-bold mb-4 rainbow-text">Game Over!</h2>
             <p id="winnerText" class="text-2xl mb-6 text-zinc-200"></p>
             <p id="finalScore" class="text-xl mb-6 text-blue-500"></p>
-            <button onclick="window.resetGame()" class="class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg font-medium transition-all border border-zinc-700/50">
-                Replay
+            <button onclick="window.resetGame()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg font-medium transition-all border border-zinc-700/50">
+                Close
             </button>
         </div>
     </div>

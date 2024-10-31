@@ -65,7 +65,23 @@ class BattleshipAI
             return $this->makeRandomShot($previousShots);
         }
 
-        
+        // Find consecutive hits to determine ship direction
+        $consecutiveHits = [];
+        foreach ($hits as $hit) {
+            if ($this->hasAdjacentHit($hit, $hits)) {
+                $consecutiveHits[] = $hit;
+            }
+        }
+
+        if (!empty($consecutiveHits)) {
+            // Try to extend the line of hits
+            $shot = $this->extendHitLine($consecutiveHits, $previousShots);
+            if ($shot) {
+                return $shot;
+            }
+        }
+
+        // If no line extension possible, try adjacent cells of any hit
         foreach ($hits as $hit) {
             $adjacentCells = [
                 ['x' => $hit['x'] - 1, 'y' => $hit['y']],
@@ -73,6 +89,8 @@ class BattleshipAI
                 ['x' => $hit['x'], 'y' => $hit['y'] - 1],
                 ['x' => $hit['x'], 'y' => $hit['y'] + 1],
             ];
+
+            shuffle($adjacentCells); // Randomize adjacent cell selection
 
             foreach ($adjacentCells as $cell) {
                 if ($this->isValidCell($cell) && !$this->shotExists($previousShots, $cell['x'], $cell['y'])) {
@@ -82,6 +100,51 @@ class BattleshipAI
         }
 
         return $this->makeRandomShot($previousShots);
+    }
+
+    private function hasAdjacentHit(array $hit, array $hits): bool
+    {
+        foreach ($hits as $otherHit) {
+            if ($hit !== $otherHit) {
+                if (abs($hit['x'] - $otherHit['x']) + abs($hit['y'] - $otherHit['y']) === 1) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private function extendHitLine(array $consecutiveHits, array $previousShots): ?array
+    {
+        // Sort hits to find direction
+        usort($consecutiveHits, function($a, $b) {
+            return ($a['x'] === $b['x']) 
+                ? $a['y'] - $b['y'] 
+                : $a['x'] - $b['x'];
+        });
+
+        $isHorizontal = $consecutiveHits[0]['x'] === $consecutiveHits[1]['x'];
+        $start = reset($consecutiveHits);
+        $end = end($consecutiveHits);
+
+        // Try both ends of the line
+        $possibleShots = $isHorizontal 
+            ? [
+                ['x' => $start['x'], 'y' => $start['y'] - 1],
+                ['x' => $end['x'], 'y' => $end['y'] + 1]
+            ]
+            : [
+                ['x' => $start['x'] - 1, 'y' => $start['y']],
+                ['x' => $end['x'] + 1, 'y' => $end['y']]
+            ];
+
+        foreach ($possibleShots as $shot) {
+            if ($this->isValidCell($shot) && !$this->shotExists($previousShots, $shot['x'], $shot['y'])) {
+                return $shot;
+            }
+        }
+
+        return null;
     }
 
     private function isValidCell(array $cell): bool

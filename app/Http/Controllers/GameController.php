@@ -211,7 +211,6 @@ class GameController extends Controller
         $aiShipsRemaining = false;
         $playerShipsRemaining = false;
 
-        
         foreach ($aiBoard as $row) {
             if (in_array(1, $row)) {  
                 $aiShipsRemaining = true;
@@ -219,7 +218,6 @@ class GameController extends Controller
             }
         }
 
-        
         foreach ($playerBoard as $row) {
             if (in_array(1, $row)) {  
                 $playerShipsRemaining = true;
@@ -227,8 +225,12 @@ class GameController extends Controller
             }
         }
 
-        if (!$aiShipsRemaining) return 'Player';
-        if (!$playerShipsRemaining) return 'AI';
+        if (!$aiShipsRemaining || !$playerShipsRemaining) {
+            $winner = !$aiShipsRemaining ? 'Player' : 'AI';
+            $this->saveGameRecord($winner);
+            $this->updateLeaderboard($winner);
+            return $winner;
+        }
         return false;
     }
 

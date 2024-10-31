@@ -4,6 +4,44 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set up CSRF token for all AJAX requests
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
+
+    let lastClickTime = 0;
+    const COOLDOWN_TIME = 1500; // 1.5 seconds in milliseconds
+    let cooldownTimer = null;
+
+    document.getElementById('ai-board').addEventListener('click', async (e) => {
+        const currentTime = Date.now();
+        if (currentTime - lastClickTime < COOLDOWN_TIME) {
+            const remainingCooldown = ((COOLDOWN_TIME - (currentTime - lastClickTime)) / 1000).toFixed(1);
+            addLogMessage(`Please wait ${remainingCooldown}s before shooting again`, 'error');
+            return;
+        }
+
+        const aiBoard = document.getElementById('ai-board');
+        aiBoard.classList.add('cooldown');
+        lastClickTime = currentTime;
+
+        // Start cooldown timer display
+        const cooldownDisplay = document.createElement('div');
+        cooldownDisplay.className = 'cooldown-timer';
+        document.body.appendChild(cooldownDisplay);
+
+        const updateCooldown = () => {
+            const remaining = ((COOLDOWN_TIME - (Date.now() - lastClickTime)) / 1000).toFixed(1);
+            if (remaining > 0) {
+                cooldownDisplay.textContent = `${remaining}s`;
+                requestAnimationFrame(updateCooldown);
+            } else {
+                cooldownDisplay.remove();
+                aiBoard.classList.remove('cooldown');
+            }
+        };
+        updateCooldown();
+
+        if (gamePhase !== 'playing' || !e.target.matches('button') || e.target.disabled) return;
+
+        // Rest of your existing click handler code...
+    });
 });
 
 function showGameOver(winner, score) {
