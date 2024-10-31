@@ -12,8 +12,16 @@
             "dest": "/api/index.php"
         }
     ],
-    "buildCommand": "composer install --no-dev && npm install && npm run build",
-    "outputDirectory": "public",
+    "builds": [
+        {
+            "src": "api/index.php",
+            "use": "vercel-php@0.6.0"
+        },
+        {
+            "src": "public/**",
+            "use": "@vercel/static"
+        }
+    ],
     "env": {
         "APP_ENV": "production",
         "APP_DEBUG": "false",
