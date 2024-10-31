@@ -65,7 +65,6 @@ class BattleshipAI
             return $this->makeRandomShot($previousShots);
         }
 
-        // Find consecutive hits to determine ship direction
         $consecutiveHits = [];
         foreach ($hits as $hit) {
             if ($this->hasAdjacentHit($hit, $hits)) {
@@ -74,14 +73,12 @@ class BattleshipAI
         }
 
         if (!empty($consecutiveHits)) {
-            // Try to extend the line of hits
             $shot = $this->extendHitLine($consecutiveHits, $previousShots);
             if ($shot) {
                 return $shot;
             }
         }
 
-        // If no line extension possible, try adjacent cells of any hit
         foreach ($hits as $hit) {
             $adjacentCells = [
                 ['x' => $hit['x'] - 1, 'y' => $hit['y']],
@@ -90,7 +87,7 @@ class BattleshipAI
                 ['x' => $hit['x'], 'y' => $hit['y'] + 1],
             ];
 
-            shuffle($adjacentCells); // Randomize adjacent cell selection
+            shuffle($adjacentCells);
 
             foreach ($adjacentCells as $cell) {
                 if ($this->isValidCell($cell) && !$this->shotExists($previousShots, $cell['x'], $cell['y'])) {
@@ -116,7 +113,6 @@ class BattleshipAI
 
     private function extendHitLine(array $consecutiveHits, array $previousShots): ?array
     {
-        // Sort hits to find direction
         usort($consecutiveHits, function($a, $b) {
             return ($a['x'] === $b['x']) 
                 ? $a['y'] - $b['y'] 
@@ -127,7 +123,6 @@ class BattleshipAI
         $start = reset($consecutiveHits);
         $end = end($consecutiveHits);
 
-        // Try both ends of the line
         $possibleShots = $isHorizontal 
             ? [
                 ['x' => $start['x'], 'y' => $start['y'] - 1],
